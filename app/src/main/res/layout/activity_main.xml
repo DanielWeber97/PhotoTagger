@@ -14,6 +14,8 @@
         android:orientation="horizontal">
 
         <Button
+            android:onClick="scrollLeft"
+            android:id="@+id/back"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
@@ -36,6 +38,8 @@
 
 
         <Button
+            android:onClick="scrollRight"
+            android:id="@+id/forward"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
@@ -133,6 +137,12 @@
 
 
     </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/testButton"
+        android:onClick="test"/>
 
 
 </LinearLayout>
