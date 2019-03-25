@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.MediaStore;
@@ -29,14 +31,18 @@ public class MainActivity extends AppCompatActivity {
     final int IMAGE_CODE = 888;
     private String tag;
     private int size;
-    private Bitmap currentImg;
-    private ArrayList<Bitmap> loadedImages;
-    private int[] testImages;
-    private int timesTestPressed;
-    private ArrayList<Integer> loadedTestImages;
     private int scrollIndex;
-    private byte[] currentBlob;
     private int id;
+    private int timesTestPressed;
+
+    private ArrayList<Bitmap> loadedImages;
+    private ArrayList<Integer> loadedTestImages;
+
+    private Bitmap currentImg;
+    private byte[] currentBlob;
+    private int[] testImages;
+
+    private ImageView display;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         timesTestPressed = 0;
         scrollIndex = 0;
         testImages = new int[]{R.drawable.one, R.drawable.two, R.drawable.three, R.drawable.four};
-
+        display = findViewById(R.id.display);
 
     }
 
@@ -106,11 +112,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void load(View v) {
-        String[] tags = handleTags(this.tag);
+        loadedImages.clear();
+
+        EditText t = findViewById(R.id.tagTextView);
+        String[] tags = handleTags(t.getText().toString());
+        Cursor c;
+
+
+         Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         for (int i = 0; i < tags.length; i++) {
-            db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+            c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+            Log.v("mytag", c.getCount()+"");
+            while(c.moveToNext()){
+                 b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+                loadedImages.add(b);
+            }
+            c.close();
         }
-        loadedImages.add(currentImg);
+        display.setImageBitmap(b);
+        handleButtons(v);
     }
 
     public void test(View v) {
@@ -129,20 +149,30 @@ public class MainActivity extends AppCompatActivity {
             scrollIndex++;
         }
     }
+    public void handleButtons(View v) {
+        Button left = findViewById(R.id.back);
+        Button right = findViewById(R.id.forward);
+        ImageView image = findViewById(R.id.display);
+        Log.v("mytag","loaded images size: " + loadedImages.size());
+        if (loadedImages.size() > 0) {
+            left.setVisibility(View.VISIBLE);
+            right.setVisibility(View.VISIBLE);
+        }
+    }
 
     public void scrollLeft(View v) {
         ImageView image = findViewById(R.id.display);
         if (scrollIndex > 0) {
             scrollIndex--;
-            image.setBackground(getDrawable(loadedTestImages.get(scrollIndex)));
+            image.setImageBitmap(loadedImages.get(scrollIndex));
         }
     }
 
     public void scrollRight(View v) {
         ImageView image = findViewById(R.id.display);
-        if (scrollIndex < loadedTestImages.size()-1) {
+        if (scrollIndex < loadedImages.size()-1) {
             scrollIndex++;
-            image.setBackground(getDrawable(loadedTestImages.get(scrollIndex)));
+            image.setImageBitmap(loadedImages.get(scrollIndex));
         }
     }
 
