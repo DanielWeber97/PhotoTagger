@@ -2,21 +2,27 @@ package com.example.phototagger;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     SQLiteDatabase db;
@@ -29,15 +35,17 @@ public class MainActivity extends AppCompatActivity {
     private int timesTestPressed;
     private ArrayList<Integer> loadedTestImages;
     private int scrollIndex;
-
+    private byte[] currentBlob;
+    private int id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         db = this.openOrCreateDatabase("Database", Context.MODE_PRIVATE, null);
-        db.execSQL("CREATE TABLE if not exists Photos(ID int, Photo text, Size int)");
+        db.execSQL("CREATE TABLE if not exists Photos(ID int, Photo blob, Size int)");
         db.execSQL("CREATE TABLE if not exists Tags(ID int, Tag text)");
+
 
         loadedImages = new ArrayList<Bitmap>();
         loadedTestImages = new ArrayList<Integer>();
@@ -62,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = x.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-            Log.v("MYTAG", "in OnActivityResult");
 
             ImageView img = (ImageView) findViewById(R.id.display);
             img.setImageBitmap(imageBitmap);
@@ -70,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
             this.size = imageBitmap.getByteCount();
             TextView size = (TextView) findViewById(R.id.sizeTextView);
             size.setText(this.size + "");
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
+            currentBlob = stream.toByteArray();
+
+
         }
     }
 
@@ -78,7 +90,22 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    public void load() {
+    public void save(View v){
+        Date d = new Date();
+        id = (int) d.getTime()/1000;
+        db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob,this.size});
+        EditText t = findViewById(R.id.tagTextView);
+        String[] tags = handleTags(t.getText().toString());
+        for(int i = 0; i < tags.length; i++) {
+            db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
+        }
+        Cursor c = db.rawQuery("SELECT * FROM Tags, Photos WHERE Tags.ID = Photos.ID",null);
+        while(c.moveToNext()){
+            Log.v("mytag", c.getString(0) + " "+ c.getString(1));
+        }
+    }
+
+    public void load(View v) {
         String[] tags = handleTags(this.tag);
         for (int i = 0; i < tags.length; i++) {
             db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
