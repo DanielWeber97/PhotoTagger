@@ -11,7 +11,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <Button
@@ -23,19 +23,20 @@
             android:background="@drawable/back"
             android:onClick="scrollLeft"
             android:visibility="invisible" />
+<android.support.v7.widget.CardView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    android:layout_marginBottom="5dp">
 
-        <android.support.v7.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp">
+        <ImageView
+            android:id="@+id/display"
+            android:scaleType="fitXY"
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:layout_weight="80" />
 
-            <ImageView
-                android:id="@+id/display"
-                android:layout_width="300dp"
-                android:layout_height="200dp"
-                android:scaleType="fitXY" />
-        </android.support.v7.widget.CardView>
+</android.support.v7.widget.CardView>
 
 
         <Button
@@ -53,35 +54,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
         android:layout_marginTop="10dp"
-        android:gravity="left"
-        android:orientation="horizontal">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-        <android.support.v7.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
- <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="left"
-        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:orientation="horizontal">
 
-            <Button
-                android:layout_width="75dp"
-                android:layout_height="40dp"
-                android:backgroundTint="@color/colorPrimary"
-                android:clickable="false"
-                android:gravity="center_vertical"
-                android:text="Tag" />
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:clickable="false"
+            android:text="Tag" />
 
-            <EditText
-                android:id="@+id/tagTextView"
-                android:layout_width="250dp"
-                android:layout_height="40dp"
-                android:text="Enter tags here" />
-</LinearLayout>
-        </android.support.v7.widget.CardView>
+        <EditText
+            android:id="@+id/tagTextView"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            android:text="Enter tags here" />
 
     </LinearLayout>
 
@@ -89,13 +83,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
         android:layout_marginTop="5dp"
         android:gravity="left"
         android:orientation="horizontal">
 
         <Button
-            android:layout_width="75dp"
+            android:layout_width="100dp"
             android:layout_height="40dp"
             android:backgroundTint="@color/colorPrimary"
             android:clickable="false"
@@ -112,33 +105,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+        android:orientation="horizontal">
 
             <!--Save button-->
             <Button
-                android:id="@+id/save"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:layout_weight="50"
                 android:backgroundTint="@color/colorPrimary"
-                android:onClick="save"
                 android:text="Save" />
-
 
             <!--Load button-->
 
             <Button
-                android:id="@+id/load"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:layout_weight="50"
                 android:backgroundTint="@color/colorPrimary"
-                android:onClick="load"
                 android:text="Load" />
 
 
@@ -151,7 +134,5 @@
             android:backgroundTint="@color/colorPrimary"
             android:onClick="capture"
             android:text="Capture" />
-
-
     </LinearLayout>
 </LinearLayout>
