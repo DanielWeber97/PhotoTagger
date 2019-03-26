@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private int[] testImages;
 
     private ImageView display;
-
+    private Toast currentToast;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         loadedTestImages = new ArrayList<Integer>();
         timesTestPressed = 0;
         scrollIndex = 0;
+        state = 0;
         display = findViewById(R.id.display);
 
     }
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         startActivityForResult(takePictureIntent, IMAGE_CODE);
-        state = 1;
     }
 
     @Override
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             currentBlob = stream.toByteArray();
 
 
+            state = 1;
         }
     }
 
@@ -107,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
             }
             state = 2;
-            Toast.makeText(this,"Image Saved!", Toast.LENGTH_SHORT).show();
+
+            showToast("Image Saved!");
         }
     }
 
@@ -129,10 +131,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 c.close();
             }
+            scrollIndex=loadedImages.size()-1;
             display.setImageBitmap(b);
             handleButtons(v);
             state = 3;
-            Toast.makeText(this,"Image Loaded!", Toast.LENGTH_SHORT).show();
+            showToast("Image Loaded!");
         }
     }
 
@@ -146,6 +149,18 @@ public class MainActivity extends AppCompatActivity {
             left.setVisibility(View.VISIBLE);
             right.setVisibility(View.VISIBLE);
         }
+    }
+
+
+    public void showToast(String text)
+    {
+        if(currentToast != null)
+        {
+            currentToast.cancel();
+        }
+        currentToast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        currentToast.show();
+
     }
 
     public void scrollLeft(View v) {
