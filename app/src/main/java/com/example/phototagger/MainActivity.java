@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private int scrollIndex;
     private int id;
     private int timesTestPressed;
+    private int state; //0 = nothing done, 1 = just captured, 2 = just saved, 3 = just loaded
 
     private ArrayList<Bitmap> loadedImages;
     private ArrayList<Integer> loadedTestImages;
@@ -51,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         loadedTestImages = new ArrayList<Integer>();
         timesTestPressed = 0;
         scrollIndex = 0;
-        testImages = new int[]{R.drawable.one, R.drawable.two, R.drawable.three, R.drawable.four};
         display = findViewById(R.id.display);
 
     }
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         startActivityForResult(takePictureIntent, IMAGE_CODE);
-
+        state = 1;
     }
 
     @Override
@@ -94,35 +96,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void save(View v) {
-        Date d = new Date();
-        id = (int) d.getTime() / 1000;
-        db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
-        EditText t = findViewById(R.id.tagTextView);
-        String[] tags = handleTags(t.getText().toString());
-        for (int i = 0; i < tags.length; i++) {
-            db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
+
+        if(state == 1) {
+            Date d = new Date();
+            id = (int) d.getTime() / 1000;
+            db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
+            EditText t = findViewById(R.id.tagTextView);
+            String[] tags = handleTags(t.getText().toString());
+            for (int i = 0; i < tags.length; i++) {
+                db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
+            }
+            state = 2;
+            Toast.makeText(this,"Image Saved!", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void load(View v) {
-        loadedImages.clear();
+        if(state != 0) {
+            loadedImages.clear();
 
-        EditText t = findViewById(R.id.tagTextView);
-        String[] tags = handleTags(t.getText().toString());
-        Cursor c;
+            EditText t = findViewById(R.id.tagTextView);
+            String[] tags = handleTags(t.getText().toString());
+            Cursor c;
 
 
-        Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        for (int i = 0; i < tags.length; i++) {
-            c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
-            while (c.moveToNext()) {
-                b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-                loadedImages.add(b);
+            Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            for (int i = 0; i < tags.length; i++) {
+                c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+                while (c.moveToNext()) {
+                    b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+                    loadedImages.add(b);
+                }
+                c.close();
             }
-            c.close();
+            display.setImageBitmap(b);
+            handleButtons(v);
+            state = 3;
+            Toast.makeText(this,"Image Loaded!", Toast.LENGTH_SHORT).show();
         }
-        display.setImageBitmap(b);
-        handleButtons(v);
     }
 
 
