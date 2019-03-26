@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView display;
     private Toast currentToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             Matrix m = new Matrix();
             m.postRotate(90);
-            imageBitmap = Bitmap.createBitmap(imageBitmap, 0 , 0, imageBitmap.getWidth(), imageBitmap.getHeight(),m,true);
+            imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), m, true);
 
 
             ImageView img = (ImageView) findViewById(R.id.display);
@@ -102,23 +104,27 @@ public class MainActivity extends AppCompatActivity {
 
     public void save(View v) {
 
-        if(state == 1) {
-            Date d = new Date();
-            id = (int) d.getTime() / 1000;
-            db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
+        if (state == 1) {
             EditText t = findViewById(R.id.tagTextView);
             String[] tags = handleTags(t.getText().toString());
-            for (int i = 0; i < tags.length; i++) {
-                db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
-            }
-            state = 2;
+            if (t.getText().toString().equals("")) {
+                showToast("Please enter a tag");
+            } else {
+                Date d = new Date();
+                id = (int) d.getTime() / 1000;
+                db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
+                for (int i = 0; i < tags.length; i++) {
+                    db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
+                }
+                state = 2;
 
-            showToast("Image Saved!");
+                showToast("Image Saved!");
+            }
         }
     }
 
     public void load(View v) {
-        if(state != 0) {
+      //  if (state != 0) {
             loadedImages.clear();
 
             EditText t = findViewById(R.id.tagTextView);
@@ -135,12 +141,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 c.close();
             }
-            scrollIndex=loadedImages.size()-1;
+            scrollIndex = loadedImages.size() - 1;
             display.setImageBitmap(b);
             handleButtons(v);
             state = 3;
-            showToast("Image Loaded!");
-        }
+            if(loadedImages.size()>0) {
+                showToast("Image Loaded!");
+            } else{
+                showToast("No matching images");
+            }
+     //   }
     }
 
 
@@ -152,17 +162,19 @@ public class MainActivity extends AppCompatActivity {
         if (loadedImages.size() > 1) {
             left.setVisibility(View.VISIBLE);
             right.setVisibility(View.VISIBLE);
+        } else {
+            left.setVisibility(View.INVISIBLE);
+            right.setVisibility(View.INVISIBLE);
         }
     }
 
 
-    public void showToast(String text)
-    {
-        if(currentToast != null)
-        {
+    public void showToast(String text) {
+        if (currentToast != null) {
             currentToast.cancel();
         }
         currentToast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        currentToast.setGravity(Gravity.CENTER_VERTICAL,0,-100);
         currentToast.show();
 
     }
@@ -171,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
         ImageView image = findViewById(R.id.display);
         if (scrollIndex > 0) {
             scrollIndex--;
-        }else{
-            scrollIndex = loadedImages.size()-1;
+        } else {
+            scrollIndex = loadedImages.size() - 1;
         }
         image.setImageBitmap(loadedImages.get(scrollIndex));
     }
@@ -181,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         ImageView image = findViewById(R.id.display);
         if (scrollIndex < loadedImages.size() - 1) {
             scrollIndex++;
-        } else{
+        } else {
             scrollIndex = 0;
         }
         image.setImageBitmap(loadedImages.get(scrollIndex));

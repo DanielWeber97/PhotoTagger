@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorAccent"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="beforeDescendants"
     android:orientation="vertical"
-    tools:context=".MainActivity"
-    android:background="@drawable/gradient">
+    tools:context=".MainActivity">
 
 
     <LinearLayout
@@ -19,26 +21,27 @@
             android:id="@+id/back"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginLeft="30dp"
             android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
             android:layout_weight="18"
             android:background="@drawable/back"
             android:onClick="scrollLeft"
             android:visibility="invisible" />
-<android.support.v7.widget.CardView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    app:cardCornerRadius="5dp"
-    android:layout_marginBottom="5dp">
 
-        <ImageView
-            android:id="@+id/display"
-            android:scaleType="fitXY"
-            android:layout_width="150dp"
-            android:layout_height="200dp"
-            android:layout_weight="64" />
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="5dp">
 
-</android.support.v7.widget.CardView>
+            <ImageView
+                android:id="@+id/display"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
+                android:layout_weight="64"
+                android:scaleType="fitXY" />
+
+        </android.support.v7.widget.CardView>
 
 
         <Button
@@ -46,8 +49,8 @@
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
-            android:layout_weight="18"
             android:layout_marginRight="30dp"
+            android:layout_weight="18"
             android:background="@drawable/forward"
             android:onClick="scrollRight"
             android:visibility="invisible" />
@@ -61,93 +64,216 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="left"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:clickable="false"
+                    android:gravity="center"
+                    android:text="Tags: "
+                    android:textColor="@color/button"
+                    android:textSize="24dp" />
+
+                <EditText
+                    android:id="@+id/tagTextView"
+                    android:layout_width="250dp"
+                    android:layout_height="40dp"
+                    android:focusedByDefault="false"
+                    android:textColor="@color/button"
+                    android:text="Enter Tags Here" />
+
+            </LinearLayout>
+
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="left"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:clickable="false"
+                    android:gravity="center"
+                    android:textColor="@color/button"
+                    android:text="Size: "
+                    android:textSize="24dp" />
+
+                <EditText
+                    android:id="@+id/sizeTextView"
+                    android:layout_width="250dp"
+                    android:layout_height="40dp"
+                    android:focusedByDefault="false"
+                    android:textColor="@color/button"
+                    android:text="Image size" />
+
+            </LinearLayout>
+
+
+        </android.support.v7.widget.CardView>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="left"
             android:orientation="horizontal">
 
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="40dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:clickable="false"
-            android:text="Tag" />
-<!--<android.support.v7.widget.CardView-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content">-->
-
-    <!--<TextView-->
-        <!--android:layout_width="100dp"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:text="Tag"-->
-        <!--android:gravity="center"/>-->
-
-<!--</android.support.v7.widget.CardView>-->
-        <EditText
-            android:id="@+id/tagTextView"
-            android:layout_width="250dp"
-            android:layout_height="40dp"
-            android:text="Enter tags here" />
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="left"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="40dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:clickable="false"
-            android:text="Size" />
-
-        <EditText
-            android:id="@+id/sizeTextView"
-            android:layout_width="250dp"
-            android:layout_height="40dp"
-            android:text="Image size" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
             <!--Save colorPrimary-->
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
+            <android.support.v7.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:layout_weight="50"
-                android:backgroundTint="@color/colorPrimary"
                 android:onClick="save"
-                android:text="Save" />
+                app:cardBackgroundColor="@color/button"
+                app:cardCornerRadius="5dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="20dp">
+
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="50"
+                        android:background="@drawable/save"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_weight="50"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:fontFamily="@font/ubuntu"
+                        android:gravity="center|top"
+                        android:onClick="save"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="24dp" />
+
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
 
             <!--Load colorPrimary-->
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
+            <android.support.v7.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:layout_weight="50"
-                android:backgroundTint="@color/colorPrimary"
                 android:onClick="load"
-                android:text="Load" />
+                app:cardBackgroundColor="@color/button"
+                app:cardCornerRadius="5dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="20dp">
+
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="50"
+                        android:background="@drawable/load"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_weight="50"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:fontFamily="@font/ubuntu"
+                        android:gravity="center|top"
+                        android:onClick="load"
+                        android:text="Load"
+                        android:textColor="@color/white"
+                        android:textSize="24dp" />
+
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
 
 
         </LinearLayout>
 
-        <!--Capture colorPrimary-->
-        <Button
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:onClick="capture"
-            android:text="Capture" />
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="50"
+            app:cardBackgroundColor="@color/button"
+            app:cardCornerRadius="5dp"
+            android:onClick="capture">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingTop="20dp">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="50"
+                    android:background="@drawable/camera"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:layout_weight="50"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:fontFamily="@font/ubuntu"
+                    android:gravity="center|top"
+                    android:onClick="capture"
+                    android:text="Capture"
+                    android:textColor="@color/white"
+                    android:textSize="24dp" />
+
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
     </LinearLayout>
 </LinearLayout>
