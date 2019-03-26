@@ -6,9 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,12 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private int[] testImages;
 
     private ImageView display;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,12 +73,15 @@ public class MainActivity extends AppCompatActivity {
 
             ImageView img = (ImageView) findViewById(R.id.display);
             img.setImageBitmap(imageBitmap);
+
             currentImg = imageBitmap;
             this.size = imageBitmap.getByteCount();
+
             TextView size = (TextView) findViewById(R.id.sizeTextView);
             size.setText(this.size + "");
+
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             currentBlob = stream.toByteArray();
 
 
@@ -96,18 +93,14 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    public void save(View v){
+    public void save(View v) {
         Date d = new Date();
-        id = (int) d.getTime()/1000;
-        db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob,this.size});
+        id = (int) d.getTime() / 1000;
+        db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
         EditText t = findViewById(R.id.tagTextView);
         String[] tags = handleTags(t.getText().toString());
-        for(int i = 0; i < tags.length; i++) {
+        for (int i = 0; i < tags.length; i++) {
             db.execSQL("INSERT INTO Tags values (?, ?)", new Object[]{id, tags[i]});
-        }
-        Cursor c = db.rawQuery("SELECT * FROM Tags, Photos WHERE Tags.ID = Photos.ID",null);
-        while(c.moveToNext()){
-            Log.v("mytag", c.getString(0) + " "+ c.getString(1));
         }
     }
 
@@ -119,12 +112,11 @@ public class MainActivity extends AppCompatActivity {
         Cursor c;
 
 
-         Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         for (int i = 0; i < tags.length; i++) {
             c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
-            Log.v("mytag", c.getCount()+"");
-            while(c.moveToNext()){
-                 b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+            while (c.moveToNext()) {
+                b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
                 loadedImages.add(b);
             }
             c.close();
@@ -133,28 +125,13 @@ public class MainActivity extends AppCompatActivity {
         handleButtons(v);
     }
 
-    public void test(View v) {
 
-        Button left = findViewById(R.id.back);
-        Button right = findViewById(R.id.forward);
-        ImageView image = findViewById(R.id.display);
-        if (timesTestPressed > 0) {
-            left.setVisibility(View.VISIBLE);
-            right.setVisibility(View.VISIBLE);
-        }
-        if (timesTestPressed < 4) {
-            loadedTestImages.add(testImages[timesTestPressed]);
-            timesTestPressed++;
-            image.setBackground(getDrawable(loadedTestImages.get(timesTestPressed-1 )));
-            scrollIndex++;
-        }
-    }
     public void handleButtons(View v) {
         Button left = findViewById(R.id.back);
         Button right = findViewById(R.id.forward);
         ImageView image = findViewById(R.id.display);
-        Log.v("mytag","loaded images size: " + loadedImages.size());
-        if (loadedImages.size() > 0) {
+        Log.v("mytag", "loaded images size: " + loadedImages.size());
+        if (loadedImages.size() > 1) {
             left.setVisibility(View.VISIBLE);
             right.setVisibility(View.VISIBLE);
         }
@@ -170,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void scrollRight(View v) {
         ImageView image = findViewById(R.id.display);
-        if (scrollIndex < loadedImages.size()-1) {
+        if (scrollIndex < loadedImages.size() - 1) {
             scrollIndex++;
             image.setImageBitmap(loadedImages.get(scrollIndex));
         }
