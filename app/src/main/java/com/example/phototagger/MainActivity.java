@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -71,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             Bundle extras = x.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
+            Matrix m = new Matrix();
+            m.postRotate(90);
+            imageBitmap = Bitmap.createBitmap(imageBitmap, 0 , 0, imageBitmap.getWidth(), imageBitmap.getHeight(),m,true);
 
 
             ImageView img = (ImageView) findViewById(R.id.display);
@@ -167,16 +171,20 @@ public class MainActivity extends AppCompatActivity {
         ImageView image = findViewById(R.id.display);
         if (scrollIndex > 0) {
             scrollIndex--;
-            image.setImageBitmap(loadedImages.get(scrollIndex));
+        }else{
+            scrollIndex = loadedImages.size()-1;
         }
+        image.setImageBitmap(loadedImages.get(scrollIndex));
     }
 
     public void scrollRight(View v) {
         ImageView image = findViewById(R.id.display);
         if (scrollIndex < loadedImages.size() - 1) {
             scrollIndex++;
-            image.setImageBitmap(loadedImages.get(scrollIndex));
+        } else{
+            scrollIndex = 0;
         }
+        image.setImageBitmap(loadedImages.get(scrollIndex));
     }
 
 }
