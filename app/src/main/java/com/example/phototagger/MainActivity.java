@@ -124,33 +124,84 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void load(View v) {
-      //  if (state != 0) {
-            loadedImages.clear();
+        //  if (state != 0) {
+        loadedImages.clear();
 
-            EditText t = findViewById(R.id.tagTextView);
-            String[] tags = handleTags(t.getText().toString());
-            Cursor c;
+        EditText t = findViewById(R.id.tagTextView);
+        String[] tags = handleTags(t.getText().toString());
+        EditText s = findViewById(R.id.sizeTextView);
 
 
-            Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        Bitmap b = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        if (!t.getText().toString().equals("") && !s.getText().toString().equals("")) {
+            Cursor c = null;
             for (int i = 0; i < tags.length; i++) {
-                c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
-                while (c.moveToNext()) {
-                    b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-                    loadedImages.add(b);
-                }
-                c.close();
+                c = loadTagAndSize(b, s.getText().toString(), tags, i);
             }
-            scrollIndex = loadedImages.size() - 1;
+            if (c != null) c.close();
+        } else if (!s.getText().toString().equals("") && t.getText().toString().equals("")) {
+            loadSize(b, s.getText().toString());
+        } else if (t.getText().toString().equals("") && !s.getText().toString().equals("")) {
+            Cursor c = null;
+            for (int i = 0; i < tags.length; i++) {
+                c = loadTags(b, tags, i);
+            }
+            if (c != null) c.close();
+        }
+
+
+        scrollIndex = loadedImages.size() - 1;
+        if (loadedImages.size() > 0) {
+            display.setImageBitmap(loadedImages.get(scrollIndex));
+        } else {
             display.setImageBitmap(b);
-            handleButtons(v);
-            state = 3;
-            if(loadedImages.size()>0) {
-                showToast("Image Loaded!");
-            } else{
-                showToast("No matching images");
-            }
-     //   }
+        }
+        handleButtons(v);
+        state = 3;
+
+
+        if (loadedImages.size() > 0) {
+            showToast("Image Loaded!");
+        } else {
+            showToast("No matching images");
+        }
+
+
+        //////////////////////////
+        //   }
+    }
+
+    public Cursor loadTags(Bitmap b, String[] tags, int i) {
+        Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+        while (c.moveToNext()) {
+            b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+            loadedImages.add(b);
+        }
+        return c;
+    }
+
+    public Cursor loadSize(Bitmap b, String size) {
+        String upper = (int) (Integer.parseInt(size) * 1.25) + "";
+        String lower = (int) (Integer.parseInt(size) * .75) + "";
+        Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID", new String[]{lower, upper});
+        while (c.moveToNext()) {
+            b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+            loadedImages.add(b);
+        }
+        return c;
+
+    }
+
+    public Cursor loadTagAndSize(Bitmap b, String size, String[] tags, int i) {
+        String upper = (int) (Integer.parseInt(size) * 1.25) + "";
+        String lower = (int) (Integer.parseInt(size) * .75) + "";
+        Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID AND Tag = ?", new String[]{lower, upper, tags[i]});
+        while (c.moveToNext()) {
+            b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+            loadedImages.add(b);
+        }
+        return c;
+
     }
 
 
@@ -174,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
             currentToast.cancel();
         }
         currentToast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        currentToast.setGravity(Gravity.CENTER_VERTICAL,0,-100);
+        currentToast.setGravity(Gravity.CENTER_VERTICAL, 0, -100);
         currentToast.show();
 
     }
