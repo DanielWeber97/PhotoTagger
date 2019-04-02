@@ -34,11 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private int state; //0 = nothing done, 1 = just captured, 2 = just saved, 3 = just loaded
 
     private ArrayList<Bitmap> loadedImages;
-    private ArrayList<Integer> loadedTestImages;
+    private ArrayList<Integer> imageSizes;
 
     private Bitmap currentImg;
     private byte[] currentBlob;
-    private int[] testImages;
 
     private ImageView display;
     private Toast currentToast;
@@ -54,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         loadedImages = new ArrayList<Bitmap>();
-        loadedTestImages = new ArrayList<Integer>();
+        imageSizes = new ArrayList<Integer>();
         timesTestPressed = 0;
         scrollIndex = 0;
         state = 0;
@@ -111,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Please enter a tag");
             } else if (!s.getText().toString().matches("[0-9]+")) {
                 showToast("Please enter a valid size");
-             }else {
+            } else {
                 Date d = new Date();
                 id = (int) d.getTime() / 1000;
                 db.execSQL("INSERT INTO Photos values (?, ?, ?)", new Object[]{id, this.currentBlob, this.size});
@@ -127,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
     public void load(View v) {
         //  if (state != 0) {
         loadedImages.clear();
+        imageSizes.clear();
 
         EditText t = findViewById(R.id.tagTextView);
         String[] tags = handleTags(t.getText().toString());
@@ -152,8 +152,11 @@ public class MainActivity extends AppCompatActivity {
         scrollIndex = loadedImages.size() - 1;
         if (loadedImages.size() > 0) {
             display.setImageBitmap(loadedImages.get(scrollIndex));
+            String size = imageSizes.get(scrollIndex)+"";
+            s.setText(size,EditText.BufferType.EDITABLE);
         } else {
             display.setImageBitmap(b);
+            s.setText("",EditText.BufferType.EDITABLE);
         }
         handleButtons(v);
         state = 3;
@@ -171,10 +174,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadTags(Bitmap b, String[] tags, int i) {
-        Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+        Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
         while (c.moveToNext()) {
             b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-            loadedImages.add(b);
+            int size = c.getInt(1);
+            if (!loadedImages.contains(b)) {
+                loadedImages.add(b);
+                imageSizes.add(size);
+            }
         }
 
     }
@@ -182,10 +189,14 @@ public class MainActivity extends AppCompatActivity {
     public void loadSize(Bitmap b, String size) {
         String upper = (int) (Integer.parseInt(size) * 1.25) + "";
         String lower = (int) (Integer.parseInt(size) * .75) + "";
-        Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID", new String[]{lower, upper});
+        Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID", new String[]{lower, upper});
         while (c.moveToNext()) {
             b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-            loadedImages.add(b);
+            int imgsize = c.getInt(1);
+            if (!loadedImages.contains(b)) {
+                loadedImages.add(b);
+                imageSizes.add(imgsize);
+            }
         }
 
     }
@@ -195,11 +206,20 @@ public class MainActivity extends AppCompatActivity {
             String upper = (int) (Integer.parseInt(size) * 1.25) + "";
             String lower = (int) (Integer.parseInt(size) * .75) + "";
 
-            Cursor c = db.rawQuery("SELECT Photo FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID AND Tag = ?", new String[]{lower, upper, tags[i]});
+            Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID AND Tag = ?", new String[]{lower, upper, tags[i]});
             while (c.moveToNext()) {
                 b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-                loadedImages.add(b);
+                int imgSize = c.getInt(1);
+                if (!loadedImages.contains(b)) {
+                    loadedImages.add(b);
+                    imageSizes.add(imgSize);
+                }
             }
+            for (int x = 0; i< loadedImages.size(); i++){
+                Log.v("mytag", "LI index " + i + ": "+loadedImages.get(i) + "");
+            }
+
+            Log.v("mytag", "trying to add "+ ": "+b + "");
         } catch (Exception e) {
             showToast("Enter a valid number");
         }
