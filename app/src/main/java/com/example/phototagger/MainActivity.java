@@ -120,6 +120,11 @@ public class MainActivity extends AppCompatActivity {
                 state = 2;
                 showToast("Image Saved!");
             }
+            Cursor c = db.rawQuery("SELECT * FROM Photos, Tags WHERE Photos.ID = Tags.ID", null);
+            while(c.moveToNext()){
+                Log.v("mytag", c.getInt(0) + " " + c.getBlob(1)+ " " +c.getString(2) +" "+ c.getString(4));
+            }
+
         }
     }
 
@@ -140,16 +145,14 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (!s.getText().toString().equals("") && t.getText().toString().equals("")) {
             loadSize(b, s.getText().toString());
-        } else if (t.getText().toString().equals("") && !s.getText().toString().equals("")) {
-            Cursor c = null;
+        } else if (!t.getText().toString().equals("") && s.getText().toString().equals("")) {
             for (int i = 0; i < tags.length; i++) {
                 loadTags(b, tags, i);
             }
-            if (c != null) c.close();
         }
 
 
-        scrollIndex = loadedImages.size() - 1;
+        scrollIndex = 0;
         if (loadedImages.size() > 0) {
             display.setImageBitmap(loadedImages.get(scrollIndex));
             String size = imageSizes.get(scrollIndex)+"";
@@ -174,15 +177,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadTags(Bitmap b, String[] tags, int i) {
+        Log.v("mytag","in loadTags");
         Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
         while (c.moveToNext()) {
             b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
+            Log.v("mytag", b+"");
             int size = c.getInt(1);
             if (!loadedImages.contains(b)) {
                 loadedImages.add(b);
                 imageSizes.add(size);
             }
         }
+        c.close();
 
     }
 
@@ -198,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
                 imageSizes.add(imgsize);
             }
         }
+        c.close();
 
     }
 
@@ -215,11 +222,10 @@ public class MainActivity extends AppCompatActivity {
                     imageSizes.add(imgSize);
                 }
             }
-            for (int x = 0; i< loadedImages.size(); i++){
-                Log.v("mytag", "LI index " + i + ": "+loadedImages.get(i) + "");
-            }
+            //for (int x = 0; i< loadedImages.size(); i++){
+            //    Log.v("mytag", "LI index " + i + ": "+loadedImages.get(i) + "");
+            //}
 
-            Log.v("mytag", "trying to add "+ ": "+b + "");
         } catch (Exception e) {
             showToast("Enter a valid number");
         }
@@ -231,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
         Button left = findViewById(R.id.back);
         Button right = findViewById(R.id.forward);
         ImageView image = findViewById(R.id.display);
-        Log.v("mytag", "loaded images size: " + loadedImages.size());
+        //Log.v("mytag", "loaded images size: " + loadedImages.size());
         if (loadedImages.size() > 1) {
             left.setVisibility(View.VISIBLE);
             right.setVisibility(View.VISIBLE);
