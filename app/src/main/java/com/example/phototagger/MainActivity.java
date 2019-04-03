@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -34,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private int state; //0 = nothing done, 1 = just captured, 2 = just saved, 3 = just loaded
 
     private ArrayList<Bitmap> loadedImages;
-    private ArrayList<Integer> imageSizes;
+    private ArrayList<Integer> loadedSizes;
+    private ArrayList<String> loadedTags;
 
     private Bitmap currentImg;
     private byte[] currentBlob;
@@ -53,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         loadedImages = new ArrayList<Bitmap>();
-        imageSizes = new ArrayList<Integer>();
+        loadedTags = new ArrayList<String>();
+        loadedSizes = new ArrayList<Integer>();
         timesTestPressed = 0;
         scrollIndex = 0;
         state = 0;
@@ -121,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Image Saved!");
             }
             Cursor c = db.rawQuery("SELECT * FROM Photos, Tags WHERE Photos.ID = Tags.ID", null);
-            while(c.moveToNext()){
-                Log.v("mytag", c.getInt(0) + " " + c.getBlob(1)+ " " +c.getString(2) +" "+ c.getString(4));
+            while (c.moveToNext()) {
+                Log.v("mytag", c.getInt(0) + " " + c.getBlob(1) + " " + c.getString(2) + " " + c.getString(4));
             }
 
         }
@@ -131,7 +134,8 @@ public class MainActivity extends AppCompatActivity {
     public void load(View v) {
         //  if (state != 0) {
         loadedImages.clear();
-        imageSizes.clear();
+        loadedSizes.clear();
+        loadedTags.clear();
 
         EditText t = findViewById(R.id.tagTextView);
         String[] tags = handleTags(t.getText().toString());
@@ -144,7 +148,8 @@ public class MainActivity extends AppCompatActivity {
                 loadTagAndSize(b, s.getText().toString(), tags, i);
             }
         } else if (!s.getText().toString().equals("") && t.getText().toString().equals("")) {
-            loadSize(b, s.getText().toString());
+            if (s.getText().toString().matches("[0-9]*"))
+                loadSize(b, s.getText().toString());
         } else if (!t.getText().toString().equals("") && s.getText().toString().equals("")) {
             for (int i = 0; i < tags.length; i++) {
                 loadTags(b, tags, i);
@@ -155,11 +160,12 @@ public class MainActivity extends AppCompatActivity {
         scrollIndex = 0;
         if (loadedImages.size() > 0) {
             display.setImageBitmap(loadedImages.get(scrollIndex));
-            String size = imageSizes.get(scrollIndex)+"";
-            s.setText(size,EditText.BufferType.EDITABLE);
+            String size = loadedSizes.get(scrollIndex) + "";
+            t.setText(loadedTags.get(scrollIndex));
+            s.setText(size, EditText.BufferType.EDITABLE);
         } else {
             display.setImageBitmap(b);
-            s.setText("",EditText.BufferType.EDITABLE);
+            s.setText("", EditText.BufferType.EDITABLE);
         }
         handleButtons(v);
         state = 3;
@@ -177,15 +183,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadTags(Bitmap b, String[] tags, int i) {
-        Log.v("mytag","in loadTags");
-        Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
+        Log.v("mytag", "in loadTags");
+        Cursor c = db.rawQuery("SELECT Photo, Size, Photos.ID FROM Photos, Tags WHERE Tag = ? AND Photos.ID = Tags.ID", new String[]{tags[i]});
         while (c.moveToNext()) {
             b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
-            Log.v("mytag", b+"");
+            Log.v("mytag", b + "");
             int size = c.getInt(1);
             if (!loadedImages.contains(b)) {
                 loadedImages.add(b);
-                imageSizes.add(size);
+                loadedSizes.add(size);
+                loadedTags.add(getAllTags(c.getInt(2)));
             }
         }
         c.close();
@@ -195,13 +202,14 @@ public class MainActivity extends AppCompatActivity {
     public void loadSize(Bitmap b, String size) {
         String upper = (int) (Integer.parseInt(size) * 1.25) + "";
         String lower = (int) (Integer.parseInt(size) * .75) + "";
-        Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID", new String[]{lower, upper});
+        Cursor c = db.rawQuery("SELECT Photo, Size, Photos.ID FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID", new String[]{lower, upper});
         while (c.moveToNext()) {
             b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
             int imgsize = c.getInt(1);
             if (!loadedImages.contains(b)) {
                 loadedImages.add(b);
-                imageSizes.add(imgsize);
+                loadedSizes.add(imgsize);
+                loadedTags.add(getAllTags(c.getInt(2)));
             }
         }
         c.close();
@@ -213,23 +221,33 @@ public class MainActivity extends AppCompatActivity {
             String upper = (int) (Integer.parseInt(size) * 1.25) + "";
             String lower = (int) (Integer.parseInt(size) * .75) + "";
 
-            Cursor c = db.rawQuery("SELECT Photo, Size FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID AND Tag = ?", new String[]{lower, upper, tags[i]});
+            Cursor c = db.rawQuery("SELECT Photo, Size,Photos.ID FROM Photos, Tags WHERE Size Between ? AND ? AND Photos.ID = Tags.ID AND Tag = ?", new String[]{lower, upper, tags[i]});
             while (c.moveToNext()) {
                 b = BitmapFactory.decodeByteArray(c.getBlob(0), 0, c.getBlob(0).length);
                 int imgSize = c.getInt(1);
+                Log.v("mytag", getAllTags(c.getInt(2)));
                 if (!loadedImages.contains(b)) {
                     loadedImages.add(b);
-                    imageSizes.add(imgSize);
+                    loadedSizes.add(imgSize);
+                    loadedTags.add(getAllTags(c.getInt(2)));
                 }
             }
-            //for (int x = 0; i< loadedImages.size(); i++){
-            //    Log.v("mytag", "LI index " + i + ": "+loadedImages.get(i) + "");
-            //}
 
         } catch (Exception e) {
             showToast("Enter a valid number");
         }
 
+    }
+
+    public String getAllTags(int i) {
+        String toReturn = "";
+        Cursor c = db.rawQuery("Select Tag from Tags WHERE ID = ?", new String[]{i + ""});
+        while (c.moveToNext()) {
+            toReturn += c.getString(0) + ";";
+        }
+        toReturn = toReturn.substring(0, toReturn.length() - 1);
+        Log.v("mytag", toReturn);
+        return toReturn;
     }
 
 
@@ -260,22 +278,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void scrollLeft(View v) {
         ImageView image = findViewById(R.id.display);
+        EditText s = findViewById(R.id.sizeTextView);
+        EditText t = findViewById(R.id.tagTextView);
         if (scrollIndex > 0) {
             scrollIndex--;
         } else {
             scrollIndex = loadedImages.size() - 1;
         }
         image.setImageBitmap(loadedImages.get(scrollIndex));
+        s.setText(loadedSizes.get(scrollIndex)+"", TextView.BufferType.EDITABLE);
+        t.setText(loadedTags.get(scrollIndex), TextView.BufferType.EDITABLE);
     }
 
     public void scrollRight(View v) {
         ImageView image = findViewById(R.id.display);
+        EditText s = findViewById(R.id.sizeTextView);
+        EditText t = findViewById(R.id.tagTextView);
         if (scrollIndex < loadedImages.size() - 1) {
             scrollIndex++;
         } else {
             scrollIndex = 0;
         }
         image.setImageBitmap(loadedImages.get(scrollIndex));
+         s.setText(loadedSizes.get(scrollIndex)+"", TextView.BufferType.EDITABLE);
+         t.setText(loadedTags.get(scrollIndex),TextView.BufferType.EDITABLE);
     }
 
 }
